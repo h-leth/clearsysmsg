@@ -90,33 +90,29 @@ async fn handle_commands(bot: Bot, msg: Message, cmd: Command) -> ResponseResult
 }
 
 async fn delete_service_message(bot: Bot, msg: Message) -> ResponseResult<()> {
-    
-    // Attempt to delete the service message
-    let msg_id = format!("{}", msg.chat.id);
-    let hashed_msg_id = digest(msg_id);
+    let hashed_msg_id = digest(msg.chat.id.to_string());
 
+    // Attempt to delete the service message
     match bot.delete_message(msg.chat.id, msg.id).await {
         Ok(_) => {
-            log::info!("Successfully deleted service message in chat {}", &hashed_msg_id);
+            log::info!("Successfully deleted service message in chat {}", hashed_msg_id);
         }
         Err(e) => {
             log::error!("Failed to delete message: {}", e);
-            
-            // Warn if deleting failed
+
+            // Warn in group if deleting failed
             if let Some(_user) = msg.from {
                 let error_msg = format!(
-                    "⚠️ I couldn't delete the service message. \n\
-                    Please make sure I have admin privileges and permission to delete messages in this group."
+                    "⚠️ Couldn't delete the service message. \n\
+                    Could be missing admin privileges and/or permission to delete messages."
                 );
-                
-                // Try to send error message to the user privately or in the group
+
                 if let Err(send_err) = bot.send_message(msg.chat.id, error_msg).await {
                     log::error!("Failed to send error message to affected chat: {}", send_err);
                 }
             }
         }
     }
-    
     Ok(())
 }
 
