@@ -40,7 +40,8 @@ async fn main() {
                     MessageKind::LeftChatMember(_) |
                     MessageKind::GroupChatCreated(_) |
                     MessageKind::SupergroupChatCreated(_) |
-                    MessageKind::ChannelChatCreated(_)
+                    MessageKind::ChannelChatCreated(_) |
+                    MessageKind::Pinned(_)
                 )
             })
             .endpoint(delete_service_message),
