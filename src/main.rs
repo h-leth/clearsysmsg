@@ -24,7 +24,7 @@ async fn main() {
     let developer_chat_id = env::var("DEVELOPER_CHAT_ID").expect("Enviroment variable $DEVELOPER_CHAT_ID not set.");
 
     let _ = bot.send_message(developer_chat_id, format!("Bot running")).await;
-  
+
     let handler = Update::filter_message()
         .branch(
             dptree::entry()
