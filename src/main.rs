@@ -24,7 +24,7 @@ async fn main() {
     let developer_chat_id = env::var("DEVELOPER_CHAT_ID").expect("Enviroment variable $DEVELOPER_CHAT_ID not set.");
 
     let _ = bot.send_message(developer_chat_id, format!("Bot running")).await;
-    
+  
     let handler = Update::filter_message()
         .branch(
             dptree::entry()
@@ -36,7 +36,7 @@ async fn main() {
                 // Check if message is a service message (user joined/left)
                 matches!(
                     msg.kind,
-                    MessageKind::NewChatMembers(_) | 
+                    MessageKind::NewChatMembers(_) |
                     MessageKind::LeftChatMember(_) |
                     MessageKind::GroupChatCreated(_) |
                     MessageKind::SupergroupChatCreated(_) |
@@ -68,7 +68,7 @@ async fn handle_commands(bot: Bot, msg: Message, cmd: Command) -> ResponseResult
                               • User left messages\n\
                               • Group creation messages\n\n\
                               Use /help to get started.";
-            
+
             bot.send_message(msg.chat.id, welcome_text).await?;
         }
         Command::Help => {
@@ -81,7 +81,7 @@ async fn handle_commands(bot: Bot, msg: Message, cmd: Command) -> ResponseResult
                             2 - Make the bot an admin\n\
                             3 - Give it permission to delete messages\n\n\
                             Note: Admin privileges is necessary to delete messages!";
-            
+
             bot.send_message(msg.chat.id, help_text)
                 .await?;
         }
@@ -125,7 +125,7 @@ async fn delete_service_message(bot: Bot, msg: Message) -> ResponseResult<()> {
 async fn is_bot_admin(bot: &Bot, chat_id: ChatId) -> Result<bool, teloxide::RequestError> {
     let me = bot.get_me().await?;
     let admins = bot.get_chat_administrators(chat_id).await?;
-    
+
     Ok(admins.iter().any(|admin| admin.user.id == me.id))
 }
 
@@ -133,7 +133,7 @@ async fn is_bot_admin(bot: &Bot, chat_id: ChatId) -> Result<bool, teloxide::Requ
 async fn get_bot_permissions(bot: &Bot, chat_id: ChatId) -> Result<Option<teloxide::types::ChatMemberKind>, teloxide::RequestError> {
     let me = bot.get_me().await?;
     let member = bot.get_chat_member(chat_id, me.id).await?;
-  
+
     match member.kind {
         teloxide::types::ChatMemberKind::Owner(_owner) => Ok(None),
         teloxide::types::ChatMemberKind::Administrator(admin) => {
