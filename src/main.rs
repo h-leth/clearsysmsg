@@ -1,7 +1,7 @@
 use std::env;
 use sha256::digest;
 use teloxide::{prelude::*,
-    types::{MessageKind, Owner},
+    types::MessageKind,
     utils::command::BotCommands
 };
 
