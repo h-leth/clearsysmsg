@@ -21,9 +21,10 @@ async fn main() {
 
     let bot = Bot::from_env();
 
-    let developer_chat_id = env::var("DEVELOPER_CHAT_ID").expect("Enviroment variable $DEVELOPER_CHAT_ID not set.");
-
-    let _ = bot.send_message(developer_chat_id, format!("Bot running")).await;
+    // if $DEVELOPER_CHAT_ID is provided a message is sent to the hoster of the bot 
+    if let Ok(developer_chat_id) = env::var("DEVELOPER_CHAT_ID") {
+        bot.send_message(developer_chat_id, "Bot running".to_string()).await.expect("Bot couldn't send start message to developer chat");
+    };
 
     let handler = Update::filter_message()
         .branch(
