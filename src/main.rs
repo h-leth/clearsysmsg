@@ -104,10 +104,9 @@ async fn delete_service_message(bot: Bot, msg: Message) -> ResponseResult<()> {
 
             // Warn in group if deleting failed
             if let Some(_user) = msg.from {
-                let error_msg = format!(
+                let error_msg =
                     "⚠️ Couldn't delete the service message. \n\
-                    Could be missing admin privileges and/or permission to delete messages."
-                );
+                    Could be missing admin privileges and/or permission to delete messages.";
 
                 if let Err(send_err) = bot.send_message(msg.chat.id, error_msg).await {
                     log::error!("Failed to send error message to affected chat: {}", send_err);
