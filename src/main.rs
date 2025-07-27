@@ -63,30 +63,12 @@ async fn main() {
 async fn handle_commands(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
     match cmd {
         Command::Start => {
-            let welcome_text = "👋 Hello! I'm a bot that automatically deletes join/leave messages.\n\n\
-                              Just add me to your group and give me admin permissions to delete messages.\n\n\
-                              I will automatically remove:\n\
-                              • User joined messages\n\
-                              • User left messages\n\
-                              • Group creation messages\n\n\
-                              Use /help to get started.";
-
-            bot.send_message(msg.chat.id, welcome_text).await?;
+            // Warn in group if deleting failed
+            bot.send_message(msg.chat.id, get_welcome_text()).await?;
         }
         Command::Help => {
-            let help_text = "🤖 What I do:\n\
-                            • Automatically delete join/leave notifications\n\
-                            • Keep your chat clean from service messages\n\
-                            • Work silently in the background\n\n\
-                            Setup:\n\
-                            1 - Add this bot to your group\n\
-                            2 - Make the bot an admin\n\
-                            3 - Give it permission to delete messages\n\n\
-                            Note: Admin privileges is necessary to delete messages!";
-
-            bot.send_message(msg.chat.id, help_text)
-                .await?;
-        }
+            bot.send_message(msg.chat.id, get_help_text())
+                .await?; }
     }
     Ok(())
 }
@@ -115,6 +97,28 @@ async fn delete_service_message(bot: Bot, msg: Message) -> ResponseResult<()> {
         }
     }
     Ok(())
+}
+
+pub fn get_welcome_text()-> &'static str {
+    "👋 Hello! I'm a bot that automatically deletes join/leave messages.\n\n\
+    Just add me to your group and give me admin permissions to delete messages.\n\n\
+    I will automatically remove:\n\
+    • User joined messages\n\
+    • User left messages\n\
+    • Group creation messages\n\n\
+    Use /help to get started."
+}
+
+pub fn get_help_text()-> &'static  str {
+    "🤖 What I do:\n\
+    • Automatically delete join/leave notifications\n\
+    • Keep your chat clean from service messages\n\
+    • Work silently in the background\n\n\
+    Setup:\n\
+    1 - Add this bot to your group\n\
+    2 - Make the bot an admin\n\
+    3 - Give it permission to delete messages\n\n\
+    Note: Admin privileges is necessary to delete messages!"
 }
 
 // Additional utility functions for more advanced features
