@@ -1,9 +1,10 @@
 use std::env;
 use sha256::digest;
 use teloxide::{prelude::*,
-    types::MessageKind,
+    types::{ChatKind, InlineKeyboardButton, InlineKeyboardMarkup, MessageKind},
     utils::command::BotCommands
 };
+use url::Url;
 
 #[derive(BotCommands, Clone)]
 #[command(rename_rule = "lowercase", description = "Bot commands:")]
@@ -21,7 +22,7 @@ async fn main() {
 
     let bot = Bot::from_env();
 
-    // if $DEVELOPER_CHAT_ID is provided a message is sent to the hoster of the bot 
+    // if $DEVELOPER_CHAT_ID is provided a message is sent to the hoster of the bot
     if let Ok(developer_chat_id) = env::var("DEVELOPER_CHAT_ID") {
         bot.send_message(developer_chat_id, "Bot running".to_string()).await.expect("Bot couldn't send start message to developer chat");
     };
@@ -61,14 +62,32 @@ async fn main() {
 }
 
 async fn handle_commands(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
+
+    let me = bot.get_me().await?;
+    let bot_username = me.username();
+
     match cmd {
         Command::Start => {
-            // Warn in group if deleting failed
-            bot.send_message(msg.chat.id, get_welcome_text()).await?;
-        }
-        Command::Help => {
-            bot.send_message(msg.chat.id, get_help_text())
-                .await?; }
+            match msg.chat.kind {
+                ChatKind::Private(_) => {
+                    log::info!("Private chat");
+
+                    let add_to_grp_str = format!("https://t.me/{}?startgroup=true", bot_username);
+                    let add_to_grp_url = Url::parse(&add_to_grp_str).expect("Not a valid url, {e}");
+                    let url_button = InlineKeyboardButton::url("Add me to your group.".to_string(), add_to_grp_url);
+                    let keyboard = InlineKeyboardMarkup::default().append_row(vec![url_button]);
+
+                    bot.send_message(msg.chat.id, get_start_texts_private())
+                        .reply_markup(keyboard)
+                        .await?;
+                    }
+                ChatKind::Public(_) => {
+                    log::info!("Group chat");
+                    bot.send_message(msg.chat.id, get_start_texts_group()).await?;
+                }
+            }
+        } Command::Help => { bot.send_message(msg.chat.id, get_help_text())
+            .await?; }
     }
     Ok(())
 }
@@ -99,14 +118,25 @@ async fn delete_service_message(bot: Bot, msg: Message) -> ResponseResult<()> {
     Ok(())
 }
 
-pub fn get_welcome_text()-> &'static str {
-    "👋 Hello! I'm a bot that automatically deletes join/leave messages.\n\n\
-    Just add me to your group and give me admin permissions to delete messages.\n\n\
+pub fn get_start_texts_private()-> &'static str {
+    "👋 Hello! I'm a bot that automatically deletes system messages.\n\n\
+    Add me to your group and promote me to admin and give me privileges to delete messages.\n\n\
     I will automatically remove:\n\
     • User joined messages\n\
     • User left messages\n\
-    • Group creation messages\n\n\
-    Use /help to get started."
+    • Group creation messages\n\
+    • Pinned messages warnings\n\n\
+    Click the button bellow to start."
+}
+
+pub fn get_start_texts_group()-> &'static str {
+    "👋 Hello! I'm a bot that automatically deletes system messages.\n\n\
+    Give me admin permissions, and privileges to delete messages.\n\n\
+    I will automatically remove:\n\
+    • User joined messages\n\
+    • User left messages\n\
+    • Group creation messages\n\
+    • Pinned messages warnings"
 }
 
 pub fn get_help_text()-> &'static  str {
