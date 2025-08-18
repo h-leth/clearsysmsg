@@ -1,7 +1,7 @@
 use std::env;
 use sha256::digest;
 use teloxide::{prelude::*,
-    types::{ChatKind, InlineKeyboardButton, InlineKeyboardMarkup, MessageKind},
+    types::{ChatKind, ChatMemberKind, InlineKeyboardButton, InlineKeyboardMarkup, MessageKind},
     utils::command::BotCommands
 };
 use url::Url;
@@ -11,8 +11,8 @@ use url::Url;
 enum Command {
     #[command(description = "Start the bot")]
     Start,
-    #[command(description = "Show help")]
-    Help,
+    #[command(description = "Show status")]
+    Status,
 }
 
 #[tokio::main]
@@ -86,8 +86,35 @@ async fn handle_commands(bot: Bot, msg: Message, cmd: Command) -> ResponseResult
                     bot.send_message(msg.chat.id, get_start_texts_group()).await?;
                 }
             }
-        } Command::Help => { bot.send_message(msg.chat.id, get_help_text())
-            .await?; }
+        }
+
+        Command::Status => {
+            let member = bot.get_chat_member(msg.chat.id, me.id).await?;
+
+            match msg.chat.kind {
+                ChatKind::Private(_) => {
+                    log::info!("Add me to channel to see status");
+                    bot.send_message(msg.chat.id, get_status_text(get_checks_in_private_text())).await?;
+                }
+                _ => {
+                    match member.kind {
+                        ChatMemberKind::Administrator(admin) => {
+                            if admin.can_delete_messages {
+                                log::info!("Admin and can delete messages.");
+                                bot.send_message(msg.chat.id, get_status_text(get_checks_ok_text())).await?;
+                            } else {
+                                log::info!("Admin but can't delete messages.");
+                                bot.send_message(msg.chat.id, get_status_text(get_checks_missing_delete_text())).await?;
+                            }
+                        }
+                        _ => {
+                            log::info!("Neither admin or has privileges to delete messages.");
+                            bot.send_message(msg.chat.id, get_status_text(get_checks_faild_text())).await?;
+                        }
+                    }
+                }
+            };
+        }
     }
     Ok(())
 }
@@ -149,6 +176,30 @@ pub fn get_help_text()-> &'static  str {
     2 - Make the bot an admin\n\
     3 - Give it permission to delete messages\n\n\
     Note: Admin privileges is necessary to delete messages!"
+}
+
+pub fn get_status_text(checks: &'static str) -> String {
+    format!("Bot status:\n\n{checks}")
+}
+
+fn get_checks_ok_text()-> &'static str {
+   "✅- Is admin\n\
+   ✅- Has delete message privileges"
+}
+
+fn get_checks_missing_delete_text()-> &'static str {
+   "✅- Is admin\n\
+   ❌- Has privileges to delete message"
+}
+
+fn get_checks_faild_text()-> &'static str {
+   "❌- Is admin\n\
+   ❌- Has privileges to delete message"
+}
+
+fn get_checks_in_private_text()-> &'static str {
+   "❌- Not in a group,\n\
+   Add to a group to get started."
 }
 
 // Additional utility functions for more advanced features
