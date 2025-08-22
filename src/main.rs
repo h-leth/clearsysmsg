@@ -64,7 +64,15 @@ async fn main() {
 async fn handle_commands(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
 
     let me = bot.get_me().await?;
-    let bot_username = me.username();
+
+    fn add_to_grp_keyboard(me: teloxide::types::Me) -> InlineKeyboardMarkup {
+        let bot_username = me.username();
+        let add_to_grp_str = format!("https://t.me/{}?startgroup=true", bot_username);
+        let add_to_grp_url = Url::parse(&add_to_grp_str).expect("Not a valid url, {e}");
+        let url_button = InlineKeyboardButton::url("Add me to your group.".to_string(), add_to_grp_url);
+
+        InlineKeyboardMarkup::default().append_row(vec![url_button])
+    }
 
     match cmd {
         Command::Start => {
@@ -72,13 +80,9 @@ async fn handle_commands(bot: Bot, msg: Message, cmd: Command) -> ResponseResult
                 ChatKind::Private(_) => {
                     log::info!("Private chat");
 
-                    let add_to_grp_str = format!("https://t.me/{}?startgroup=true", bot_username);
-                    let add_to_grp_url = Url::parse(&add_to_grp_str).expect("Not a valid url, {e}");
-                    let url_button = InlineKeyboardButton::url("Add me to your group.".to_string(), add_to_grp_url);
-                    let keyboard = InlineKeyboardMarkup::default().append_row(vec![url_button]);
 
                     bot.send_message(msg.chat.id, get_start_texts_private())
-                        .reply_markup(keyboard)
+                        .reply_markup(add_to_grp_keyboard(me))
                         .await?;
                     }
                 ChatKind::Public(_) => {
