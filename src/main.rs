@@ -98,7 +98,9 @@ async fn handle_commands(bot: Bot, msg: Message, cmd: Command) -> ResponseResult
             match msg.chat.kind {
                 ChatKind::Private(_) => {
                     log::info!("Add me to channel to see status");
-                    bot.send_message(msg.chat.id, get_status_text(get_checks_in_private_text())).await?;
+                    bot.send_message(msg.chat.id, get_status_text(get_checks_in_private_text()))
+                        .reply_markup(add_to_grp_keyboard(me))
+                        .await?;
                 }
                 _ => {
                     match member.kind {
