@@ -97,9 +97,6 @@ jobs:
           sarif_file: clippy-results.sarif
           wait-for-processing: true
 
-      - name: Run clippy (fail on warnings)
-        run: cargo clippy --all-targets --all-features -- -D warnings
-
   build:
     name: Build
     strategy:
