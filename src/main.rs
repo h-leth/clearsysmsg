@@ -1,3 +1,4 @@
+use sha256::digest;
 use std::env;
 use teloxide::{
     prelude::*,
