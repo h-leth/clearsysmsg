@@ -65,7 +65,6 @@ async fn main() {
 }
 
 async fn handle_commands(bot: Bot, msg: Message, cmd: Command) -> ResponseResult<()> {
-
     let me = bot.get_me().await?;
 
     fn add_to_grp_keyboard(me: teloxide::types::Me) -> InlineKeyboardMarkup {
@@ -227,4 +226,3 @@ async fn is_bot_admin(bot: &Bot, chat_id: ChatId) -> Result<bool, teloxide::Requ
 
     Ok(admins.iter().any(|admin| admin.user.id == me.id))
 }
-
