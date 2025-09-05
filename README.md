@@ -38,14 +38,15 @@ A lightweight Telegram bot built with Rust that automatically deletes join/leave
 
 1. Download docker-compose.yml and .env:
     ```bash
-    wget https://github.com/h-leth/clearsysmsg/blob/master/Dockerfile
-    wget https://github.com/h-leth/clearsysmsg/blob/master/.env
+    curl -O https://raw.githubusercontent.com/h-leth/clearsysmsg/refs/heads/master/docker-compose.yaml
+    curl -O https://raw.githubusercontent.com/h-leth/clearsysmsg/refs/heads/master/.env
     ```
 
 2. Confgure environment variables:
     ```bash
     # Replace 'your_bot_token_here' with your token from BotFather 
-    nano .env
+    # Provided a easy one liner to update just token, use your favorite text editor if you rather perfer
+    sed -i -e 's/your_bot_token_here/"replace with token from BotFather"/g' .env
     ```
 
 3. Start the bot:
@@ -68,24 +69,44 @@ A lightweight Telegram bot built with Rust that automatically deletes join/leave
     ```
 
 
-#### Download binary for github
+#### Download binary and .env from github
 
-```bash
-# Get the latest tag and system architecture
-TAG=$(curl -s https://api.github.com/repos/h-leth/h-leth/releases/latest | awk -F '"' '/"tag_name":/ { print $4 }')
-ARCH=$(uname -m)
+1. **Get the latest tag and system architecture**
+    ```bash
+    TAG=$(curl -s https://api.github.com/repos/h-leth/h-leth/releases/latest | awk -F '"' '/"tag_name":/ { print $4 }')
+    ARCH=$(uname -m)
+    ```
 
-# Download 
-sudo wget https://github.com/h-leth/clearsysmsg/releases/download/$TAG/clearsysmsg-$ARCH*.tar.xz \
--O /opt/clearsysmsg/bin/clearsysmsg
+2. **Download binary and extract**
+    ```bash
+    sudo curl -s -L https://github.com/h-leth/clearsysmsg/releases/download/$TAG/clearsysmsg-$ARCH*.tar.xz | \
+    tar -xvz - -C /opt/clearsysmsg/bin
+    ```
 
-# Make executeable and set permissions
-sudo chmod +x /opt/clearsysmsg/bin/clearsysmsg
-sudo chown clearsysmsg:clearsysmsg /opt/clearsysmsg/bin/clearsysmsg
-```
+3. **Download .env file**
+    ```bash
+    sudo curl https://raw.githubusercontent.com/h-leth/clearsysmsg/refs/heads/master/.env \
+    -o /opt/clearsysmsg/.env
+    ```
 
+4. **Update .env with bot token**
+    ```bash
+    # Provided a easy one liner to update just token, use your favorite text editor if you rather perfer
+    sudo sed -i -e 's/your_bot_token_here/"replace with token from BotFather"/g' /opt/clearsysmsg/.env
+    ```
 
-#### Build from source
+5.  **Set permissions**
+    ```bash
+    sudo chmod 500 /opt/clearsysmsg/bin/clearsysmsg
+    sudo chmod 600 /opt/clearsysmsg/.env
+    sudo chown -R clearsysmsg:clearsysmsg /opt/clearsysmsg/
+    ```
+
+#### Option: Build from source
+
+##### Prerequisites
+
+- Rust toolchain installed on your system
 
 1. **Clone the repository**
    ```bash
@@ -98,6 +119,10 @@ sudo chown clearsysmsg:clearsysmsg /opt/clearsysmsg/bin/clearsysmsg
    cargo build --release
    ```
 
+3. **Copy binary**
+    ```bash
+    sudo cp ./target/release/clearsysmsg /opt/clearsysmsg/bin
+    ```
 
 ## 📱 Bot Commands
 
