@@ -1,0 +1,18 @@
+services:
+  clearsysmsg:
+    image: hleth/clearsysmsg:latest
+    container_name: telegram-clearsysmsg-bot
+    restart: unless-stopped
+    environment:
+      TELOXIDE_TOKEN: ${TELOXIDE_TOKEN}
+      # Optional
+      DEVELOPER_CHAT_ID: ${DEVELOPER_CHAT_ID}
+      RUST_LOG: ${RUST_LOG:-info}
+    
+    # Network configuration
+    networks:
+      - clearsysmsg-network
+
+networks:
+  clearsysmsg-network:
+    driver: bridge
