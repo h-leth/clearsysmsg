@@ -1,0 +1,49 @@
+[Unit]
+Description=ClearSysMsg Telegram Bot - Auto-delete system messages
+Documentation=https://github.com/h-leth/clearsysmsg
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=clearsysmsg
+Group=clearsysmsg
+WorkingDirectory=/opt/clearsysmsg
+
+# Environment file with bot configuration
+EnvironmentFile=/opt/clearsysmsg/.env
+
+# Binary location
+ExecStart=/opt/clearsysmsg/bin/clearsysmsg
+
+# Restart policy
+Restart=always
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/clearsysmsg
+
+# Additional security hardening
+ProtectKernelTunables=true
+ProtectControlGroups=true
+ProtectKernelModules=true
+PrivateDevices=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+
+# Resource limits
+MemoryMax=64M
+CPUQuota=10%
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=clearsysmsg
+
+[Install]
+WantedBy=multi-user.target
