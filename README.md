@@ -31,54 +31,73 @@ A lightweight Telegram bot built with Rust that automatically deletes join/leave
 
 #### Prerequisites
 
-- Docker installed
+- Docker installed on your system
 - Telegram Bot Token from [@BotFather](https://t.me/BotFather)
 
-```dockerfile
-FROM rust:1.70 as builder
-WORKDIR /app
-COPY . .
-RUN cargo build --release
+### Use Docker Compose
 
-FROM debian:bookworm-slim
-WORKDIR /app
-RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
-COPY --from=builder /app/target/release/telegram-delete-join-bot .
-ENV TELOXIDE_TOKEN=""
-CMD ["./telegram-delete-join-bot"]
-```
+1. Download docker-compose.yml and .env:
+    ```bash
+    wget https://github.com/h-leth/clearsysmsg/blob/master/Dockerfile
+    wget https://github.com/h-leth/clearsysmsg/blob/master/.env
+    ```
 
-```bash
-docker build -t telegram-delete-join-bot .
-docker run -e TELOXIDE_TOKEN="your_token" telegram-delete-join-bot
-```
+2. Confgure environment variables:
+    ```bash
+    # Replace 'your_bot_token_here' with your token from BotFather 
+    nano .env
+    ```
+
+3. Start the bot:
+    ```bash
+    docker compose up -d
+    ```
 
 ### Option 2: Run as a service
+
+1. Create a service user
+    ```bash
+    sudo useradd -r -s /bin/false -d /opt/clearsysmsg clearsysmsg
+    ```
+
+2. Create directory structure:
+    ```bash
+    sudo mkdir -p /opt/clearsysmsg/bin
+    sudo mkdir -p /opt/clearsysmsg/logs
+    sudo chown -R clearsysmsg:clearsysmsg /opt/clearsysmsg
+    ```
+
 
 #### Download binary for github
 
 ```bash
-wget https://github.com/h-leth/clearsysmsg/releases/download/v.0.1/source.tar.gz
+# Get the latest tag and system architecture
+TAG=$(curl -s https://api.github.com/repos/h-leth/h-leth/releases/latest | awk -F '"' '/"tag_name":/ { print $4 }')
+ARCH=$(uname -m)
+
+# Download 
+sudo wget https://github.com/h-leth/clearsysmsg/releases/download/$TAG/clearsysmsg-$ARCH*.tar.xz \
+-O /opt/clearsysmsg/bin/clearsysmsg
+
+# Make executeable and set permissions
+sudo chmod +x /opt/clearsysmsg/bin/clearsysmsg
+sudo chown clearsysmsg:clearsysmsg /opt/clearsysmsg/bin/clearsysmsg
 ```
+
 
 #### Build from source
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/telegram-delete-join-bot.git
-   cd telegram-delete-join-bot
+   git clone https://github.com/h-leth/clearsysmsg.git
+   cd clearsysmsg
    ```
 
-2. **Set up environment**
-   ```bash
-   export TELOXIDE_TOKEN="your_bot_token_here"
-   ```
-
-3. **Build and run**
+2. **Build**
    ```bash
    cargo build --release
-   cargo run
    ```
+
 
 ## 📱 Bot Commands
 
@@ -120,33 +139,6 @@ The bot needs these admin permissions to function:
 - ✅ **Delete Messages** - Core functionality to remove service messages
 - ❌ **All other permissions can be disabled**
 
-## 🧪 Testing
-
-Run the comprehensive test suite:
-
-```bash
-# Run all tests
-cargo test
-
-# Run with output
-cargo test -- --nocapture
-
-# Run specific test
-cargo test test_is_deletable_service_message
-
-# Check test coverage
-cargo tarpaulin --out Html
-```
-
-### Test Coverage
-
-- ✅ Service message detection
-- ✅ Command handling
-- ✅ Message filtering logic
-- ✅ Bot addition detection
-- ✅ Inline keyboard generation
-- ✅ Error handling scenarios
-
 ## 🔧 Configuration
 
 ### Environment Variables
@@ -154,6 +146,7 @@ cargo tarpaulin --out Html
 | Variable | Required | Description | Default |
 |----------|----------|-------------|---------|
 | `TELOXIDE_TOKEN` | ✅ | Bot token from BotFather | - |
+| `DEVELOPER_CHAT_ID` | ❌ | Hoster's Telegram chat id | - |
 | `RUST_LOG` | ❌ | Logging level | `info` |
 
 ### Advanced Configuration
@@ -167,39 +160,6 @@ export RUST_LOG=debug
 # Set custom log format
 export RUST_LOG_STYLE=always
 ```
-
-## 🤝 Contributing
-
-We welcome contributions! Here's how to get started:
-
-### Development Setup
-
-1. **Fork and clone the repository**
-2. **Install Rust toolchain**:
-   ```bash
-   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-   ```
-3. **Install development dependencies**:
-   ```bash
-   cargo install cargo-tarpaulin  # For test coverage
-   cargo install cargo-audit      # For security audits
-   ```
-
-### Pull Request Process
-
-1. **Create a feature branch**: `git checkout -b feature/amazing-feature`
-2. **Make your changes** with tests
-3. **Run the test suite**: `cargo test`
-4. **Check formatting**: `cargo fmt -- --check`
-5. **Run clippy**: `cargo clippy -- -D warnings`
-6. **Submit pull request** with clear description
-
-### Code Style
-
-- Follow [Rust Style Guide](https://doc.rust-lang.org/1.0.0/style/)
-- Write tests for new functionality
-- Add documentation for public functions
-- Use meaningful commit messages
 
 ## 🐛 Issues and Support
 
@@ -241,7 +201,6 @@ We welcome contributions! Here's how to get started:
 ### Getting Help
 
 - 📋 **Issues**: [Create an issue](https://github.com/h-leth/clearsysmsg/issues)
-
 
 ## 📄 License
 
