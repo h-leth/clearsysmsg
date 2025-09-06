@@ -217,12 +217,3 @@ fn get_checks_in_private_text() -> &'static str {
     "❌- Not in a group,\n\
    Add to a group to get started."
 }
-
-// Additional utility functions for more advanced features
-#[allow(dead_code)]
-async fn is_bot_admin(bot: &Bot, chat_id: ChatId) -> Result<bool, teloxide::RequestError> {
-    let me = bot.get_me().await?;
-    let admins = bot.get_chat_administrators(chat_id).await?;
-
-    Ok(admins.iter().any(|admin| admin.user.id == me.id))
-}
