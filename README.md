@@ -11,30 +11,54 @@ A lightweight Telegram bot built with Rust that automatically deletes join/leave
 
 ## ✨ Features
 
-- 🧹 **Auto-Clean Service Messages**: Automatically removes join/leave notifications
-- 🔒 **Privacy Focused**: No data collection or storage
-- 🎯 **Zero Configuration**: Works out of the box once added to group
-- 🚀 **Easy Setup**: One-click group addition with inline buttons
+-  **Auto-Clean Service Messages**: Automatically removes join/leave notifications
+-  **Privacy Focused**: No data collection or storage
+-  **Zero Configuration**: Works out of the box once added to group
+-  **Easy Setup**: One-click group addition with inline buttons
 
 ### Service Messages Removed
 
-- ✅ User joined group
-- ✅ User left group
-- ✅ Group creation
-- ✅ Supergroup creation
-- ✅ Channel creation
-- ✅ Message pinned
+-  User joined group
+-  User left group
+-  Group creation
+-  Supergroup creation
+-  Channel creation
+-  Message pinned
 
-## 🚀 Quick Start
+## Setup Instructions
 
-### Option 1: Docker Deployment
+### 1. Create Your Bot
+
+1. Message [@BotFather](https://t.me/BotFather) on Telegram
+2. Send `/newbot` and follow the instructions
+3. Save your bot token securely
+
+### 2. Configure Bot Settings
+
+In BotFather, set these optional configurations:
+- **Description**: "Automatically deletes join/leave messages to keep your group chat clean"
+- **About**: "Clean Chat Bot - Removes service messages automatically"
+- **Commands**: 
+```
+start - Show welcome message
+status - Display status information  
+```
+
+### 3. Deploy and Add to Groups
+
+1. Deploy your bot using one of the methods above
+2. Add bot to your Telegram group
+3. Promote to admin with "Delete Messages" permission
+4. The bot will start working immediately
+
+### Docker Deployment
 
 #### Prerequisites
 
 - Docker installed on your system
 - Telegram Bot Token from [@BotFather](https://t.me/BotFather)
 
-### Use Docker Compose
+### Docker Compose
 
 1. Download docker-compose.yml and .env:
     ```bash
@@ -54,117 +78,21 @@ A lightweight Telegram bot built with Rust that automatically deletes join/leave
     docker compose up -d
     ```
 
-### Option 2: Run as a service
+## Bot Commands
 
-1. Create a service user
-    ```bash
-    sudo useradd -r -s /bin/false -d /opt/clearsysmsg clearsysmsg
-    ```
+    | Command | Description |
+    |---------|-------------|
+    | `/start` | Show welcome message with setup instructions |
+    | `/status` | Display comprehensive help and setup guide |
 
-2. Create directory structure:
-    ```bash
-    sudo mkdir -p /opt/clearsysmsg/bin
-    sudo mkdir -p /opt/clearsysmsg/logs
-    sudo chown -R clearsysmsg:clearsysmsg /opt/clearsysmsg
-    ```
+## Permissions Required
 
+    The bot needs these admin permissions to function:
 
-#### Download binary and .env from github
+    - ✅ **Delete Messages** - Core functionality to remove service messages
+    - ❌ **All other permissions can be disabled**
 
-1. **Get the latest tag and system architecture**
-    ```bash
-    TAG=$(curl -s https://api.github.com/repos/h-leth/h-leth/releases/latest | awk -F '"' '/"tag_name":/ { print $4 }')
-    ARCH=$(uname -m)
-    ```
-
-2. **Download binary and extract**
-    ```bash
-    sudo curl -s -L https://github.com/h-leth/clearsysmsg/releases/download/$TAG/clearsysmsg-$ARCH*.tar.xz | \
-    tar -xvz - -C /opt/clearsysmsg/bin
-    ```
-
-3. **Download .env file**
-    ```bash
-    sudo curl https://raw.githubusercontent.com/h-leth/clearsysmsg/refs/heads/master/.env \
-    -o /opt/clearsysmsg/.env
-    ```
-
-4. **Update .env with bot token**
-    ```bash
-    # Provided a easy one liner to update just token, use your favorite text editor if you rather perfer
-    sudo sed -i -e 's/your_bot_token_here/"replace with token from BotFather"/g' /opt/clearsysmsg/.env
-    ```
-
-5.  **Set permissions**
-    ```bash
-    sudo chmod 500 /opt/clearsysmsg/bin/clearsysmsg
-    sudo chmod 600 /opt/clearsysmsg/.env
-    sudo chown -R clearsysmsg:clearsysmsg /opt/clearsysmsg/
-    ```
-
-#### Option: Build from source
-
-##### Prerequisites
-
-- Rust toolchain installed on your system
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/h-leth/clearsysmsg.git
-   cd clearsysmsg
-   ```
-
-2. **Build**
-   ```bash
-   cargo build --release
-   ```
-
-3. **Copy binary**
-    ```bash
-    sudo cp ./target/release/clearsysmsg /opt/clearsysmsg/bin
-    ```
-
-## 📱 Bot Commands
-
-| Command | Description |
-|---------|-------------|
-| `/start` | Show welcome message with setup instructions |
-| `/status` | Display comprehensive help and setup guide |
-
-## 🔧 Setup Instructions
-
-### 1. Create Your Bot
-
-1. Message [@BotFather](https://t.me/BotFather) on Telegram
-2. Send `/newbot` and follow the instructions
-3. Save your bot token securely
-
-### 2. Configure Bot Settings
-
-In BotFather, set these optional configurations:
-- **Description**: "Automatically deletes join/leave messages to keep your group chat clean"
-- **About**: "Clean Chat Bot - Removes service messages automatically"
-- **Commands**: 
-  ```
-  start - Show welcome message
-  status - Display status information  
-  ```
-
-### 3. Deploy and Add to Groups
-
-1. Deploy your bot using one of the methods above
-2. Add bot to your Telegram group
-3. Promote to admin with "Delete Messages" permission
-4. The bot will start working immediately
-
-## 🛡️ Permissions Required
-
-The bot needs these admin permissions to function:
-
-- ✅ **Delete Messages** - Core functionality to remove service messages
-- ❌ **All other permissions can be disabled**
-
-## 🔧 Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -186,7 +114,29 @@ export RUST_LOG=debug
 export RUST_LOG_STYLE=always
 ```
 
-## 🐛 Issues and Support
+#### Option: Build from source
+
+##### Prerequisites
+
+- Rust toolchain installed on your system
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/h-leth/clearsysmsg.git
+cd clearsysmsg
+```
+
+2. **Build**
+```bash
+cargo build --release
+```
+
+3. **Copy binary**
+```bash
+sudo cp ./target/release/clearsysmsg /opt/clearsysmsg/bin
+```
+
+## Issues and Support
 
 ### Common Issues
 
@@ -225,9 +175,9 @@ export RUST_LOG_STYLE=always
 
 ### Getting Help
 
-- 📋 **Issues**: [Create an issue](https://github.com/h-leth/clearsysmsg/issues)
+- **Issues**: [Create an issue](https://github.com/h-leth/clearsysmsg/issues)
 
-## 📄 License
+## License
 
 This project is licensed under the GNU General Public Lisence v3.0 License - see the [LICENSE](LICENSE) file for details.
 
