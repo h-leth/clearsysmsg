@@ -80,14 +80,13 @@ async fn handle_commands(bot: Bot, msg: Message, cmd: Command) -> ResponseResult
     match cmd {
         Command::Start => match msg.chat.kind {
             ChatKind::Private(_) => {
-                log::info!("Private chat");
-
+                log::debug!("Start command: In private chat");
                 bot.send_message(msg.chat.id, get_start_texts_private())
                     .reply_markup(add_to_grp_keyboard(me))
                     .await?;
             }
             ChatKind::Public(_) => {
-                log::info!("Group chat");
+                log::debug!("Start command: In group chat");
                 bot.send_message(msg.chat.id, get_start_texts_group())
                     .await?;
             }
@@ -98,7 +97,7 @@ async fn handle_commands(bot: Bot, msg: Message, cmd: Command) -> ResponseResult
 
             match msg.chat.kind {
                 ChatKind::Private(_) => {
-                    log::info!("Add me to channel to see status");
+                    log::debug!("Status command: In private chat.");
                     bot.send_message(msg.chat.id, get_status_text(get_checks_in_private_text()))
                         .reply_markup(add_to_grp_keyboard(me))
                         .await?;
@@ -106,11 +105,11 @@ async fn handle_commands(bot: Bot, msg: Message, cmd: Command) -> ResponseResult
                 _ => match member.kind {
                     ChatMemberKind::Administrator(admin) => {
                         if admin.can_delete_messages {
-                            log::info!("Admin and can delete messages.");
+                            log::debug!("Status command: Admin and can delete messages.");
                             bot.send_message(msg.chat.id, get_status_text(get_checks_ok_text()))
                                 .await?;
                         } else {
-                            log::info!("Admin but can't delete messages.");
+                            log::debug!("Status command: Admin but can't delete messages.");
                             bot.send_message(
                                 msg.chat.id,
                                 get_status_text(get_checks_missing_delete_text()),
@@ -119,7 +118,7 @@ async fn handle_commands(bot: Bot, msg: Message, cmd: Command) -> ResponseResult
                         }
                     }
                     _ => {
-                        log::info!("Neither admin or has privileges to delete messages.");
+                        log::debug!("Status command: Not admin privileges.");
                         bot.send_message(msg.chat.id, get_status_text(get_checks_faild_text()))
                             .await?;
                     }
