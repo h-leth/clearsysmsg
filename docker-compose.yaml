@@ -6,7 +6,7 @@ services:
     environment:
       TELOXIDE_TOKEN: ${TELOXIDE_TOKEN}
       # Optional
-      DEVELOPER_CHAT_ID: ${DEVELOPER_CHAT_ID}
+      HOSTER_CHAT_ID: ${HOSTER_CHAT_ID}
       RUST_LOG: ${RUST_LOG:-info}
     
     # Network configuration
