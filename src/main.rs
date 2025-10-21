@@ -1,5 +1,6 @@
 use sha256::digest;
-use std::env;
+use std::env::{self, VarError};
+use std::sync::Arc;
 use teloxide::{
     prelude::*,
     types::{ChatKind, ChatMemberKind, InlineKeyboardButton, InlineKeyboardMarkup, MessageKind},
@@ -30,6 +31,8 @@ async fn main() {
             .expect("Bot couldn't send start message to developer chat");
     };
 
+    let del_only_left_join = Arc::new(check_if_del_only_left_join(env::var("DEL_ONLY_LEFT_JOIN")).await);
+
     let handler = Update::filter_message()
         .branch(
             dptree::entry()
@@ -37,23 +40,34 @@ async fn main() {
                 .endpoint(handle_commands),
         )
         .branch(
-            dptree::filter(|msg: Message| {
+            dptree::filter(|msg: Message, check_if_del_only_left_join: Arc<Option<bool>>| {
                 // Check if message is a service message (user joined/left)
-                matches!(
-                    msg.kind,
-                    MessageKind::NewChatMembers(_)
-                        | MessageKind::LeftChatMember(_)
-                        | MessageKind::GroupChatCreated(_)
-                        | MessageKind::SupergroupChatCreated(_)
-                        | MessageKind::ChannelChatCreated(_)
-                        | MessageKind::Pinned(_)
-                )
+                match *check_if_del_only_left_join {
+                    Some(true) => {
+                        matches!(
+                            msg.kind,
+                            MessageKind::NewChatMembers(_)
+                                | MessageKind::LeftChatMember(_)
+                        )
+                    }
+                    Some(false) | None => {
+                        matches!(
+                            msg.kind,
+                            MessageKind::NewChatMembers(_)
+                                | MessageKind::LeftChatMember(_)
+                                | MessageKind::GroupChatCreated(_)
+                                | MessageKind::SupergroupChatCreated(_)
+                                | MessageKind::ChannelChatCreated(_)
+                                | MessageKind::Pinned(_)
+                        )
+                    }
+                }
             })
             .endpoint(delete_service_message),
         );
 
     Dispatcher::builder(bot, handler)
-        .dependencies(dptree::deps![])
+        .dependencies(dptree::deps![Arc::clone(&del_only_left_join)])
         .default_handler(|_| Box::pin(async {}))
         .error_handler(LoggingErrorHandler::with_custom_text(
             "An error has occurred in the dispatcher",
@@ -127,6 +141,24 @@ async fn handle_commands(bot: Bot, msg: Message, cmd: Command) -> ResponseResult
         }
     }
     Ok(())
+}
+
+async fn check_if_del_only_left_join(env_var: Result<String, VarError>) -> Option<bool> {
+    //TODO: Have to map a non existing $DEL_ONLY_LEFT_JOIN to `false`
+    let boolen = env_var
+        .expect("VarError: {VarError}")
+        .parse::<bool>()
+        .ok();
+
+    match boolen {
+        Some(t) => {
+            log::info!("$DEL_ONLY_LEFT_JOIN is set to: {:?}", t)
+        }
+        None => {
+            log::info!("$DEL_ONLY_LEFT_JOIN is set to: {:?}, defaulting to false", boolen)
+        }
+    }
+    boolen
 }
 
 async fn delete_service_message(bot: Bot, msg: Message) -> ResponseResult<()> {
